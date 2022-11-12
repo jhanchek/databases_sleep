@@ -1,0 +1,202 @@
+---
+title: "Wine - Diagnostic Data Analytics"
+author: "Jeffrey Graves"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+# Install and Load the Relevant Packages
+```{r, message=FALSE}
+#install.packages("ggplot2")
+#install.packages("DT")
+#install.packages("corrplot")
+library("ggplot2")
+library("DT")
+library("corrplot")
+```
+
+# Import Data
+```{r}
+wine_df <- read.csv("./wine.csv", row.names=1)
+red_df = wine_df[wine_df$color == "red",]
+white_df = wine_df[wine_df$color == "white",]
+```
+
+# Investigating the Data
+```{r, collapse=TRUE}
+dim(wine_df)
+datatable(wine_df, options=list(scrollX=TRUE))
+```
+
+# Diagnostic Analytics
+## Variables
+```{r}
+variables <- colnames(wine_df)
+numeric_vars <- variables[c(-1,-13)]
+categorical_vars <- variables[c(1)]
+```
+
+## Kolmogorov-Smirnov Test
+The Kolmogorov-Smirnov test can be used to test whether two samples come from the same distribution.
+```{r, warning=FALSE}
+p_values_df <- as.data.frame(sapply(
+  numeric_vars,
+  function(name) {
+    ks.test(red_df[[name]], white_df[[name]])$p.value
+  }
+))
+colnames(p_values_df) <- c("p-value")
+datatable(p_values_df, options=list(scrollX=TRUE, pageLength=20))
+```
+
+## Correlation Analysis
+### Pearson’s Correlation Coefficient
+#### Overall
+```{r}
+correlations <- cor(wine_df[numeric_vars])
+corrplot(
+  correlations,
+  type="upper",
+  tl.col="black",
+  tl.srt=45
+)
+corrplot(
+  correlations,
+  method="number",
+  tl.col="black",
+  tl.srt=45,
+  number.cex=0.75
+)
+```
+
+#### Red
+```{r}
+correlations <- cor(red_df[numeric_vars])
+corrplot(
+  correlations,
+  type="upper",
+  tl.col="black",
+  tl.srt=45
+)
+corrplot(
+  correlations,
+  method="number",
+  tl.col="black",
+  tl.srt=45,
+  number.cex=0.75
+)
+```
+
+#### White
+```{r}
+correlations <- cor(white_df[numeric_vars])
+corrplot(
+  correlations,
+  type="upper",
+  tl.col="black",
+  tl.srt=45
+)
+corrplot(
+  correlations,
+  method="number",
+  tl.col="black",
+  tl.srt=45,
+  number.cex=0.75
+)
+```
+
+### Spearman’s Rank Correlation Coefficient
+#### Overall
+```{r}
+correlations <- cor(
+  wine_df["quality"],
+  wine_df[numeric_vars],
+  method="spearman"
+)
+corrplot(
+  correlations,
+  type="upper",
+  tl.col="black",
+  tl.srt=45
+)
+corrplot(
+  correlations,
+  method="number",
+  tl.col="black",
+  tl.srt=45,
+  number.cex=0.75
+)
+```
+
+#### Red
+```{r}
+correlations <- cor(
+  red_df["quality"],
+  red_df[numeric_vars],
+  method="spearman"
+)
+corrplot(
+  correlations,
+  type="upper",
+  tl.col="black",
+  tl.srt=45
+)
+corrplot(
+  correlations,
+  method="number",
+  tl.col="black",
+  tl.srt=45,
+  number.cex=0.75
+)
+```
+
+#### White
+```{r}
+correlations <- cor(
+  white_df["quality"],
+  white_df[numeric_vars],
+  method="spearman"
+)
+corrplot(
+  correlations,
+  type="upper",
+  tl.col="black",
+  tl.srt=45
+)
+corrplot(
+  correlations,
+  method="number",
+  tl.col="black",
+  tl.srt=45,
+  number.cex=0.75
+)
+```
+
+### Scatter Plots
+#### Overall
+```{r}
+pairs(
+  wine_df[numeric_vars],
+  pch=16,
+  cex=0.1
+)
+```
+
+#### Red
+```{r}
+pairs(
+  red_df[numeric_vars],
+  pch=16,
+  cex=0.1
+)
+```
+
+#### White
+```{r}
+pairs(
+  white_df[numeric_vars],
+  pch=16,
+  cex=0.1
+)
+```

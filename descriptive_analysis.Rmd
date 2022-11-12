@@ -1,0 +1,209 @@
+---
+title: "Wine - Descriptive Data Analysis"
+author: "Jeffrey Graves"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+# Install and Load the Relevant Packages
+```{r, message=FALSE}
+#install.packages("ggplot2")
+#install.packages("DT")
+library("ggplot2")
+library("DT")
+```
+
+# Import Data
+```{r}
+wine_df <- read.csv("./wine.csv", row.names=1)
+red_df = wine_df[wine_df$color == "red",]
+white_df = wine_df[wine_df$color == "white",]
+```
+
+# Investigating the Data
+```{r, collapse=TRUE}
+dim(wine_df)
+datatable(wine_df, options=list(scrollX=TRUE))
+```
+
+# Descriptive Analysis
+## Variables
+```{r}
+variables <- colnames(wine_df)
+numeric_vars <- variables[c(-1,-13)]
+categorical_vars <- variables[c(1)]
+
+datatable(
+  data.frame(
+    variable=names(wine_df),
+    classe=sapply(wine_df, typeof),
+    first_values=sapply(wine_df, function(x) paste0(append(head(x),"..."),  collapse = ", ")),
+    row.names = NULL
+  ),
+  options=list(scrollX=TRUE, pageLength=20)
+)
+```
+
+## Frequency Distributions
+### Pie Charts
+```{r}
+for(variable in append(categorical_vars, "quality")) {
+  tmp_df <- data.frame(table(wine_df[[variable]]))
+  colnames(tmp_df) <- c(variable, "frequency")
+  print(tmp_df)
+  colnames(tmp_df) <- c("group", "frequency")
+  print(
+    ggplot(tmp_df, aes(x="", y=frequency, fill=group))
+    + geom_bar(stat="identity", width=1, color="black")
+    + coord_polar("y", start=0)
+    #+ geom_text(aes(label=paste0(frequency)), position=position_stack(vjust=0.5))
+    + labs(x = NULL, y = NULL)
+    + theme_classic()
+    + theme(
+      axis.line=element_blank(),
+      axis.text=element_blank(),
+      axis.ticks=element_blank()
+    )
+    + guides(fill=guide_legend(title=variable))
+    + ggtitle(paste("Frequency Distribution (", variable, ")", sep=""))
+    + theme(plot.title = element_text(hjust = 0.5))
+  )
+}
+```
+
+### Histograms
+```{r}
+for(variable in numeric_vars) {
+  print(
+    ggplot(wine_df, aes_string(x=variable))
+    + geom_histogram(
+      colour="darkorchid4", fill="darkorchid1", position="identity", bins=30, alpha=0.2
+    )
+    + ggtitle(paste("Frequency Distribution (", variable, ")", sep=""))
+    + theme(plot.title=element_text(hjust = 0.5))
+  )
+  print(
+    ggplot(wine_df, aes_string(x=variable))
+    + geom_histogram(
+        aes(color=color, fill=color), position="identity", bins=30, alpha=0.2
+      )
+    + scale_color_manual(values=c("firebrick1", "gold3"))
+    + scale_fill_manual(values=c("firebrick2", "gold"))
+    + ggtitle(paste("Frequency Distribution (", variable, ")", sep=""))
+    + theme(
+      plot.title=element_text(hjust=0.5),
+      legend.position="bottom"
+    )
+  )
+}
+```
+
+## Central Tendency
+```{r} 
+my_mode <- function(x) {
+  vals <- unique(x)
+  counts <- tabulate(match(x, vals))
+  return(vals[counts == max(counts)])
+}
+get_central_tendency <- function(df, columns, group) {
+  ret_df <- as.data.frame(
+    cbind(
+      mean=sapply(df[columns], mean),
+      median=sapply(df[columns], median),
+      mode=sapply(df[columns], my_mode)
+    )
+  )
+  colnames(ret_df) <- lapply(
+    colnames(ret_df),
+    function(x) {
+      paste(x, paste("(", group, ")", sep=""))
+    }
+  )
+  return (ret_df)
+}
+
+centrality_df <- cbind(
+  get_central_tendency(wine_df, numeric_vars, "overall"),
+  get_central_tendency(red_df, numeric_vars, "red"),
+  get_central_tendency(white_df, numeric_vars, "white")
+)
+centrality_df <- centrality_df[sort(colnames(centrality_df))]
+datatable(centrality_df, options=list(scrollX=TRUE, pageLength=20))
+```
+
+## Dispersion
+Note that the coefficient of variation (CV) is defined as follows:
+
+* $CV=\frac{\sigma}{\mu}$
+* $\sigma$ --- standard deviation
+* $\mu$ --- mean
+```{r} 
+my_range <- function(x) {
+  max.min <- range(x)
+  return(max.min[2] - max.min[1])
+}
+coeff_var <- function(x) {
+  return(sd(x) / mean(x) * 100)
+}
+get_dispersion <- function(df, columns, group) {
+  ret_df <- as.data.frame(
+    cbind(
+      range=sapply(df[columns], my_range),
+      interquartile.range=sapply(df[columns], IQR),
+      variance=sapply(df[columns], var),
+      standard.deviation=sapply(df[columns], sd),
+      coefficient.of.variation=sapply(df[columns], coeff_var)
+    )
+  )
+  colnames(ret_df) <- lapply(
+    colnames(ret_df),
+    function(x) {
+      paste(x, paste("(", group, ")", sep=""))
+    }
+  )
+  return (ret_df)
+}
+
+dispersion_df <- cbind(
+  get_dispersion(wine_df, numeric_vars, "overall"),
+  get_dispersion(red_df, numeric_vars, "red"),
+  get_dispersion(white_df, numeric_vars, "white")
+)
+n.measures <- 5
+s <- rep(1:n.measures, each = 3) + (0:2) * n.measures
+dispersion_df <- dispersion_df[,s]
+datatable(dispersion_df, options=list(scrollX=TRUE, pageLength=20))
+```
+
+### Box Plots
+```{r}
+for(var in numeric_vars){
+  group <- "color"
+  print(
+    ggplot(wine_df, aes_string(y=var))
+    + geom_boxplot(colour="darkorchid4", fill="darkorchid1", alpha=0.2)
+    + coord_flip()
+    + theme(
+      axis.title.y=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks.y=element_blank()
+    )
+  )
+  print(
+    ggplot(wine_df, aes_string(x=group, y=var, color=group))
+    + geom_boxplot(
+      aes(color=color, fill=color), position="identity", alpha=0.2
+    )
+    + scale_color_manual(values=c("firebrick1", "gold3"))
+    + scale_fill_manual(values=c("firebrick2", "gold"))
+    + coord_flip()
+    + theme(
+      axis.title.y=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks.y=element_blank(),
+      legend.position="bottom"
+    )
+  )
+}
+```
