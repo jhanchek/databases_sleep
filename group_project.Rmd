@@ -1,0 +1,60 @@
+---
+title: "Human Stress Detection in and through Sleep"
+subtitle: "Team Maximus"
+author: "Harrison Peloquin, Hunter Sawyer, Chris Dinkins, Jackson Hanchek"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Library Installations  
+
+```{r,echo=FALSE,message=FALSE,error=FALSE,warning=FALSE}
+library(pander)
+sleep_df <- read.csv("./SaYoPillow.xls", row.names=NULL)
+```
+
+
+# Explanation of Data source  
+
+Our data comes from a sleep analysis conducted using a "smart-yoga pillow".  
+the study studied 630 participants who slept on the pillow and noted a number of factors associated with each participant  
+these factors are as follows 
+
+* Snoring Range
+* respiration  rate
+* Body Temperature
+* Limb Movement Rates
+* Blood Oxygen Levels
+* Eye movement Levels
+* Number of Hours Slept
+* Heart rate
+* stress levels
+  * based on a ranking 0-4 the next day
+```{r,}
+
+```
+
+# Initial Observations
+
+One initial thing to note about our data is that a minority of participants were ranked as having a hours slept value of 0.  
+We decided that we would separate these participants into a separate data set because we were unsure how to interpret  
+this value and we were worried it would influence the rest of the data.
+
+
+# What we want to do with the data
+
+  
+
+
+
+
+
+## Citations
+
+
+  L. Rachakonda, A. K. Bapatla, S. P. Mohanty, and E. Kougianos, “SaYoPillow: Blockchain-Integrated Privacy-Assured IoMT Framework for 
+  Stress Management Considering Sleeping Habits”, IEEE Transactions on Consumer Electronics (TCE), Vol. 67, No. 1, Feb 2021, pp. 20-29. 
+    
+  L. Rachakonda, S. P. Mohanty, E. Kougianos, K. Karunakaran, and M. Ganapathiraju, “Smart-Pillow: An IoT based Device for Stress Detection     Considering Sleeping Habits”, in Proceedings of the 4th IEEE International Symposium on Smart Electronic Systems (iSES), 2018, pp. 161--166.  
