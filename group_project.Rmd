@@ -1,0 +1,71 @@
+---
+title: "Human Stress Detection in and through Sleep"
+subtitle: "Team Maximus"
+author: "Harrison Peloquin, Hunter Sawyer, Chris Dinkins, Jackson Hanchek"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# Library Installations  
+
+```{r,echo=FALSE,message=FALSE,error=FALSE,warning=FALSE}
+library("pander")
+
+bgg_df <- read.csv("./test2.csv", sep = ";")
+```
+
+
+# Explanation of Data source  
+
+
+our 
+https://www.kaggle.com/datasets/andrewmvd/board-games?resource=download 
+
+
+```{r,}
+
+```
+
+
+# Initial Observations
+
+One initial thing to note about our data is that a minority of participants were ranked as having a hours slept value of 0.  
+We decided that we would separate these participants into a separate data set because we were unsure how to interpret  
+this value and we were worried it would influence the rest of the data.  
+```{r,echo=FALSE,warning=FALSE}
+print(colnames(bgg_df))
+dim(bgg_df)
+
+#noSleep_df <- subset(bgg_df,bgg_df$sl == 0,)
+fixed_df <- subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0))
+Subtracted_years_df <- subset(bgg_df,(bgg_df$Year.Published != 0))
+
+pander(Subtracted_years_df)
+
+```
+
+the variables of note are  
+* stress levels  
+  if we are able to predict stress levels it might be possible to reduce people's stress levels by modifying some of the other factors.  
+* Blood oxygen,Heart Rate, respiration rate, Body Temperature  
+  these variables are grouped together because they are the ones that stand out as the most medically relevant. Being able to predict them is likely to be useful to medical professionals.  
+  
+We created box plots to show each of these variables for both the group where sleep is 0 and for the main group
+
+
+
+
+
+# What we want to do with the data
+
+  
+
+
+
+
+
+## Citations
+
+  Dilini Samarasinghe, July 5, 2021, "BoardGameGeek Dataset on Board Games", IEEE Dataport, doi: https://dx.doi.org/10.21227/9g61-bs59.  
