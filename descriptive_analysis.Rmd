@@ -2,7 +2,9 @@
 title: "Wine - Descriptive Data Analysis"
 author: "Jeffrey Graves"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
@@ -12,32 +14,36 @@ output: html_document
 #install.packages("DT")
 library("ggplot2")
 library("DT")
+library(pander)
 ```
 
 # Import Data
 ```{r}
-wine_df <- read.csv("./wine.csv", row.names=1)
-red_df = wine_df[wine_df$color == "red",]
-white_df = wine_df[wine_df$color == "white",]
+sleep_df <- read.csv("./SaYoPillow.cvs", row.names=NULL)
+nosleep = sleep_df[sleep_df$sl == 0,]
+pander(sleep_df)
 ```
 
 # Investigating the Data
 ```{r, collapse=TRUE}
-dim(wine_df)
+dim(sleep_df)
 datatable(wine_df, options=list(scrollX=TRUE))
 ```
 
+# Explaining the Data
+```{r}
+"Data explanation goes here"
+```
 # Descriptive Analysis
 ## Variables
 ```{r}
-variables <- colnames(wine_df)
-numeric_vars <- variables[c(-1,-13)]
+variables <- colnames(sleep_df)
 categorical_vars <- variables[c(1)]
 
 datatable(
   data.frame(
-    variable=names(wine_df),
-    classe=sapply(wine_df, typeof),
+    variable=names(sleep_df ),
+    classe=sapply(s, typeof),
     first_values=sapply(wine_df, function(x) paste0(append(head(x),"..."),  collapse = ", ")),
     row.names = NULL
   ),
