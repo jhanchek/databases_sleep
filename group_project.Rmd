@@ -1,7 +1,7 @@
 ---
-title: "Board Ga"
+title: "Board Game Analysis"
 subtitle: "Team Maximus"
-author: "Harrison Peloquin, Hunter Sawyer, Chris Dinkins, Jackson Hanchek"
+author: "Chris Dinkins, Jackson Hanchek, Harrison Peloquin, Hunter Sawyer"
 date: "`r Sys.Date()`"
 output:
   pdf_document: default
@@ -10,21 +10,28 @@ output:
 
 # Library Installations  
 
-```{r,echo=FALSE,message=FALSE,error=FALSE,warning=FALSE}
+```{r,echo=TRUE,message=FALSE,error=FALSE,warning=FALSE}
 library("pander")
 library("ggplot2")
 library("DT")
 library("corrplot")
-bgg_df <- read.csv("./test2.csv", sep = ";")
+bgg_df <- read.csv("./bgg_dataset.csv", sep = ";")
 ```
 
 
 # Explanation of Data source  
 
+```{r}
+sub_df <- bgg_df[1:15,]
+pander(sub_df)
 
-https://www.kaggle.com/datasets/andrewmvd/board-games?resource=download 
 
-Our dataset is maintained on kaggle.com, a platform for data science related tools and discussion. Our data set, titled “Board Games”, was   uploaded to the site by a senior data scientist from the Hospital Israelita Albert Einstein, the highest prestige hospital in Latin America. This data set, however, does not involve medical data as it was a leisure project. The data set, which contains over twenty thousand different board games, was taken from the website BoardGameGeek in February of 2021. BoardGameGeek is currently the largest board game ranking platform, and contains many different stats about over one hundred thousand board games. The twenty thousand board games in the data set are a subset of the larger hundred thousand. They are ranked in popularity, which requires user accounts to vote on them. Alongside popularity and name, the data includes publishing year, minimum and maximum player count, play length, suggested age, and rating from a scale of one through ten.
+```
+
+
+\textcolor{blue}{https://www.kaggle.com/datasets/andrewmvd/board-games?resource=download}
+
+Our dataset is maintained on kaggle.com, a platform for data science related tools and discussion. Our data set, titled “Board Games”, was   uploaded to the site by a senior data scientist from the Hospital Israelita Albert Einstein, the highest prestige hospital in Latin America. This data set, however, does not involve medical data as it was a leisure project. The data set, which contains over twenty thousand different board games, was taken from the website BoardGameGeek in February of 2021. BoardGameGeek is currently the largest board game ranking platform, and it contains many different stats about over one hundred thousand board games. The twenty thousand board games in the data set are a subset of the larger hundred thousand. They are ranked in popularity, which requires user accounts to vote on them. Alongside popularity and name, the data includes publishing year, minimum and maximum player count, play length, suggested age, and rating from a scale of one through ten.
 
 
 
@@ -32,24 +39,29 @@ Our dataset is maintained on kaggle.com, a platform for data science related too
 
 
 
-When our group first attempted to handle our dataset, we realized the number of rows was so large that our computers had difficulty processing it. In fact, the dataset's size was gargantuan enough to give us issues when trying to create tables using pander. We have decided the best course of action to solve this predicament was to take a smaller portion of the data and use that to represent the dataset. By choosing the first 1,000 entries, we eliminate the bias that would come from handpicking certain data.  
+When our group first attempted to handle our dataset, we realized the number of rows was so large that our computers had difficulty processing it. In fact, the dataset's size was gargantuan enough to give us issues when trying to create tables using pander. We have decided the best course of action to solve this predicament was to take a smaller portion of the data and use that to represent the dataset. By choosing the first 1,000 entries, we eliminate the bias that would come from handpicking certain data. We used this smaller data set for most testing purposes , but we did end up using the full data set. When we used the full data set we found a number of missing values in the number of owned users. We removed the contaminated observations
   
 After observing our data closely, we have noticed that there are a few cases of missing data. One such case can be found in the 'BoardGamesGeek ID', where board games can be found that do not have any IDs entered at all. We have decided that these null values do not justify throwing the entire rows away as the 'BoardGamesGeek ID' does not directly affect any way that we are analyzing or wanting to use this data. Instead, we have decided to leave these values empty.  
   
   
-One of the most prominent predicaments we have come across in the early stages of observing our data is how to handle noisy data. The first instances we noticed were in the 'Min Players' and the 'Max Players' columns. Here, we saw board games hold the value of 0, which seems meaningless and does not make much sense at first. However, considering the context of what the minimum players and the maximum players means, we theorize that a 0 value means the board game did not specify a minimum or a maximum number of players. With that said, we have decided insert what we have decided. Similarly, we can see the 'Min Age' and the 'Play Time' column also have values of 0, so we plan to insert what we plan to.   
+One of the most prominent predicaments we have come across in the early stages of observing our data is how to handle noisy data. The first instances we noticed were in the 'Min Players' and the 'Max Players' columns. Here, we saw board games hold the value of 0, which seems meaningless and does not make much sense at first. However, considering the context of what the minimum players and the maximum players means, we theorize that a 0 value means the board game did not specify a minimum or a maximum number of players. With that said, we have decided to simply remove these rows from our data sets. This accounted for a very small amount of the data and would not massively effect  
+analysis.
   
 We have also seen that the 'Year Published' column has negative values in it, which is completely illogical given the context. At first, we considered that the negative signs were a mistake, and we could take the absolute value. However, values reach -3500 so an absolute value would result in a year that has not yet occurred at the time of observing the data. Perhaps negative values represent years from BC as opposed to AD. This could be the case, but it is difficult to imagine humans in 1300 BC passing time by playing a friendly match of Tic-Tac-Toe, so it would probably be in our best interest to consult a domain expert before making assumptions.  
-  
-We also noticed that the average rating and average complexity were in decimal format with ,'s instead of decimal points. This is common practice in Brazil, where this data was collected. we changed the comma's to decimals to make performing calculations easier
 
-```{r,echo=FALSE,warning=FALSE}
+  
+We also noticed that the average rating and average complexity were in decimal format with commas instead of decimal points. This is common practice in Brazil, where this data was collected. We changed the commas to decimals to make performing calculations easier
+
+The last thing we noticed was that there were some missing/ negative values for the number of people who own some of the games. These also accounted for a tiny portion of the data so we simply omit the relevant observations.
+
+```{r,echo=TRUE,warning=FALSE}
 
 #usefull catagorizations of column names
 
 variables <- colnames(bgg_df)
 numeric_variables <- variables[c(3,4,5,6,7,8,9,10,11,12)]
 continues_variables <- numeric_variables[c(8,10)]
+numeric_variables2 <- variables[c(3,4,5,6,7,8,10,12)]
 
 
 #print(colnames(bgg_df))
@@ -65,21 +77,50 @@ removed_zero_playerCount_df <- subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$M
 #removed_zero_years_df is df with no published year of 0
 removed_zero_years_df <- subset(bgg_df,(bgg_df$Year.Published > 0))
 
-removed_both_df <- subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0 & bgg_df$Year.Published > 0))
-above_2000_df <- subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0 & bgg_df$Year.Published > 1990))
+removed_both_df <- subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0 &   
+                                  bgg_df$Year.Published > 0 & bgg_df$Owned.Users > 0))
+above_2000_df <-   
+subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0 & bgg_df$Year.Published > 1990))
 
 
 
 ```
 
 
-Here are the histograms for the bgg ranks and owned users
 
-```{r,echo=FALSE}
+# Variable explanations
+
+* ID represents the unique ID each board game is given in the BoardGamesGeek database. This is an integer.
+* Name is the name of each board game in the database. This is a string.
+* Year Published represents the (approximated in some cases) publishing year of the board game. Note that this is a signed integer, as dates * older than 1 AD are displayed as negatives.
+* Min Players is the publisher suggested minimum number of players. This is an integer. Note that some board games display a suggested * minimum players of zero.
+* Max Players is the publisher suggested maximum number of players. This is also an integer.
+* Play Time is the publisher suggested average play time. This is an integer and is in minutes.
+* Min Age is the publisher suggested minimum age of play. This is an integer.
+* Users Rated is the number of users of BoardGameGeek who have given a rating to the board game. This is an integer.
+* Rating Average is the average of all of the individual user ratings of the board game on the site. This is a float with two decimal places.     * Note the commas intead of periods to denote decimal points, which is the common standard in Brazil.
+* BGG Rank is the ranking of the board game on BoardGameGeek’s “Best of All Time” list. This rank is assumed to be correlated with Rating Average and Users Rated. This is an integer. Note that each entry is unique, as there can only be one “best game of all time” or “second best game of all time”, etc.
+
+
+
+
+
+
+
+
+# Histograms
+
+The two histograms below are based upon the BGG rank and the User count respectively.  
+The BGG rank histogram is a flat distribution,  
+which is what we would expect because of the fact that BGG ranks are unique to each game and assigned sequentially starting at 1.
+The histogram for the number of owned users looks like a Pareto distribution. It has the majority of games having player counter below 50,000
+and the number of games with a higher player count decreasing as you get higher play counts.
+```{r,echo=TRUE}
 
 # histogram creation
 
 for(variable in continues_variables) {
+  
   print(
     ggplot(removed_both_df, aes_string(x=variable))
     + geom_histogram(
@@ -95,7 +136,7 @@ for(variable in continues_variables) {
 
 
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 
 removed_both_df$Complexity.Average <- as.numeric(gsub(",",".",removed_both_df$Complexity.Average))
 removed_both_df$Rating.Average <- as.numeric(gsub(",",".",removed_both_df$Rating.Average))
@@ -104,6 +145,9 @@ removed_both_df$Rating.Average <- as.numeric(gsub(",",".",removed_both_df$Rating
 above_2000_df$Complexity.Average <- as.numeric(gsub(",",".",above_2000_df$Complexity.Average))
 above_2000_df$Rating.Average <- as.numeric(gsub(",",".",above_2000_df$Rating.Average))
 
+display_df_removed_outliers <- subset(bgg_df,(bgg_df$Min.Players != 0 &   
+          bgg_df$Max.Players != 0 &bgg_df$Max.Players < 20 ))
+
 
 ```
 
@@ -111,7 +155,20 @@ above_2000_df$Rating.Average <- as.numeric(gsub(",",".",above_2000_df$Rating.Ave
 
 
 
-```{r,echo=FALSE}
+
+# Correlation analysis 
+We created a correlation chart for all of the numeric variables.  
+We have also observed a few correlations that we found interesting upon our initial analysis. For example, we have found a very high   correlation between the ‘Rating Average’ and the ‘BGG Rank’ columns. If we view the board games that are ranked near the top of ‘BGG Rank’,  We can see the associated ‘Rating Average’ values are typically among the highest.   
+
+We also can see that there is a nearly 1 positive correlation for the number of users that own a game, and the number of users that rated a game.
+The reason for this is that the data set contains only ranked games. This is likely because of the likelihood that every person who rates a game on BGG, also checks on the website that they own the game.  
+
+We also notice that there is a very positive relation between the play time and the complexity. It seems likely that this is a causal relationship where the more complex a game is the longer the play time becomes.  
+
+
+```{r,echo=TRUE}
+print(numeric_variables)
+
 correlations <- cor(removed_both_df[numeric_variables[]])
 corrplot(
   correlations,
@@ -123,19 +180,52 @@ corrplot(
 ```
 
 
-box plots
-```{r}
-for(var in numeric_variables){
+# Scatter Plots
+
+```{r,echo=TRUE}
+plot(bgg_df$Owned.Users,   
+  bgg_df$Users.Rated, type = "p",  xlim = NULL, ylim = NULL,log = "",  
+  main = "Users Owned vs Users Rated", sub = NULL, xlab = "Users Owned", ylab = "Users Rated",
+ann = par("ann"), axes = TRUE)
+```
+
+```{r,echo=TRUE}
+plot(removed_both_df$Users.Rated,   
+     removed_both_df$Rated.Average, type = "p",  xlim = NULL, ylim = NULL,
+log = "", main = "Users Rated vs Average Rating", sub = NULL, xlab = "Users rated",   
+ylab = "Average Rating",ann = par("ann"), axes = TRUE)
+```
+
+
+# Box plots
+
+
+Note : We made two graphs for the year the games were published in. One with all the data included, and one with all games published before 1990 excluded. We did this so it is easier to see the distribution of publishing dates for the more modern games, but you can still see that there are some outliers way back in history.
+
+```{r, message=FALSE, echo=TRUE,warning=FALSE}
+
+print(
+    ggplot(display_df_removed_outliers, aes_string(y="Year.Published"))
+    + geom_boxplot(colour="darkorchid4", fill="darkorchid1", alpha=0.2)
+  )
+
+display_df_removed_outliers <-    
+subset(display_df_removed_outliers,(display_df_removed_outliers$Year.Published >= 1990))
+
+for(var in numeric_variables2){
   group <- "color"
   print(
-    ggplot(above_2000_df, aes_string(y=var))
+    ggplot(display_df_removed_outliers, aes_string(y=var))
     + geom_boxplot(colour="darkorchid4", fill="darkorchid1", alpha=0.2)
   )
 }
 ```
-# What we want to do with the data  
 
+# Project Goals
 
+When our group first observed the data, we began to wonder what traits make games good. Are more complex games more desirable, or is simplicity key? Are newer games preferred, or are older games better? Through analysis of this data, we aim to develop an understanding of which traits are desired in a board game.
+
+Our group intends to create two regression models based on the attributes of our data. One model will predict the quality of the game in terms of average user rating, and the other will predict the popularity its popularity in terms of users owned. The coefficients assigned in the regression model will tell us the significance of each attribute in the overall opinion of the game. The use of two regression models generates two separate views. It tells us what traits result in games which are good, and what traits result in games which are popular.
 
 
 
