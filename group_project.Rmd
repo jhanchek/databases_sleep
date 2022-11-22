@@ -1,33 +1,20 @@
 ---
-<<<<<<< HEAD
 title: "Board Ga"
-=======
-title: "Human Stress Detection in and through Sleep"
->>>>>>> 88376c0d616710686bad6b078897a21293db5149
 subtitle: "Team Maximus"
 author: "Harrison Peloquin, Hunter Sawyer, Chris Dinkins, Jackson Hanchek"
 date: "`r Sys.Date()`"
 output:
-<<<<<<< HEAD
   pdf_document: default
   html_document: default
-=======
-  html_document: default
-  pdf_document: default
->>>>>>> 88376c0d616710686bad6b078897a21293db5149
 ---
 
 # Library Installations  
 
 ```{r,echo=FALSE,message=FALSE,error=FALSE,warning=FALSE}
 library("pander")
-<<<<<<< HEAD
 library("ggplot2")
 library("DT")
 library("corrplot")
-=======
-
->>>>>>> 88376c0d616710686bad6b078897a21293db5149
 bgg_df <- read.csv("./test2.csv", sep = ";")
 ```
 
@@ -35,7 +22,6 @@ bgg_df <- read.csv("./test2.csv", sep = ";")
 # Explanation of Data source  
 
 
-<<<<<<< HEAD
 https://www.kaggle.com/datasets/andrewmvd/board-games?resource=download 
 
 Our dataset is maintained on kaggle.com, a platform for data science related tools and discussion. Our data set, titled “Board Games”, was   uploaded to the site by a senior data scientist from the Hospital Israelita Albert Einstein, the highest prestige hospital in Latin America. This data set, however, does not involve medical data as it was a leisure project. The data set, which contains over twenty thousand different board games, was taken from the website BoardGameGeek in February of 2021. BoardGameGeek is currently the largest board game ranking platform, and contains many different stats about over one hundred thousand board games. The twenty thousand board games in the data set are a subset of the larger hundred thousand. They are ranked in popularity, which requires user accounts to vote on them. Alongside popularity and name, the data includes publishing year, minimum and maximum player count, play length, suggested age, and rating from a scale of one through ten.
@@ -104,18 +90,10 @@ for(variable in continues_variables) {
   )
 }
 
-=======
-our 
-https://www.kaggle.com/datasets/andrewmvd/board-games?resource=download 
-
-
-```{r,}
->>>>>>> 88376c0d616710686bad6b078897a21293db5149
 
 ```
 
 
-<<<<<<< HEAD
 
 ```{r, echo=FALSE}
 
@@ -129,37 +107,10 @@ above_2000_df$Rating.Average <- as.numeric(gsub(",",".",above_2000_df$Rating.Ave
 
 ```
 
-=======
-# Initial Observations
-
-One initial thing to note about our data is that a minority of participants were ranked as having a hours slept value of 0.  
-We decided that we would separate these participants into a separate data set because we were unsure how to interpret  
-this value and we were worried it would influence the rest of the data.  
-```{r,echo=FALSE,warning=FALSE}
-print(colnames(bgg_df))
-dim(bgg_df)
-
-#noSleep_df <- subset(bgg_df,bgg_df$sl == 0,)
-fixed_df <- subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0))
-Subtracted_years_df <- subset(bgg_df,(bgg_df$Year.Published != 0))
-
-pander(Subtracted_years_df)
-
-```
-
-the variables of note are  
-* stress levels  
-  if we are able to predict stress levels it might be possible to reduce people's stress levels by modifying some of the other factors.  
-* Blood oxygen,Heart Rate, respiration rate, Body Temperature  
-  these variables are grouped together because they are the ones that stand out as the most medically relevant. Being able to predict them is likely to be useful to medical professionals.  
-  
-We created box plots to show each of these variables for both the group where sleep is 0 and for the main group
->>>>>>> 88376c0d616710686bad6b078897a21293db5149
 
 
 
 
-<<<<<<< HEAD
 ```{r,echo=FALSE}
 correlations <- cor(removed_both_df[numeric_variables[]])
 corrplot(
@@ -183,12 +134,6 @@ for(var in numeric_variables){
 }
 ```
 # What we want to do with the data  
-=======
-
-# What we want to do with the data
-
-  
->>>>>>> 88376c0d616710686bad6b078897a21293db5149
 
 
 
@@ -196,4 +141,4 @@ for(var in numeric_variables){
 
 ## Citations
 
-  Dilini Samarasinghe, July 5, 2021, "BoardGameGeek Dataset on Board Games", IEEE Dataport, doi: https://dx.doi.org/10.21227/9g61-bs59.  
+  Dilini Samarasinghe, July 5, 2021, "BoardGameGeek Dataset on Board Games", IEEE Dataport, doi: https://dx.doi.org/10.21227/9g61-bs59.
