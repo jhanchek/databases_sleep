@@ -19,7 +19,7 @@ bgg_df <- read.csv("./bgg_dataset.csv", sep = ";")
 ```
 
 
-# Explanation of Data source  
+# Explanation of Data Source  
 
 ```{r}
 sub_df <- bgg_df[1:15,]
@@ -39,24 +39,23 @@ Our dataset is maintained on kaggle.com, a platform for data science related too
 
 
 
-When our group first attempted to handle our dataset, we realized the number of rows was so large that our computers had difficulty processing it. In fact, the dataset's size was gargantuan enough to give us issues when trying to create tables using pander. We have decided the best course of action to solve this predicament was to take a smaller portion of the data and use that to represent the dataset. By choosing the first 1,000 entries, we eliminate the bias that would come from handpicking certain data. We used this smaller data set for most testing purposes , but we did end up using the full data set. When we used the full data set we found a number of missing values in the number of owned users. We removed the contaminated observations
+When our group first attempted to handle our dataset, we realized the number of rows was so large that our computers had difficulty processing it. In fact, the dataset's size was gargantuan enough to give us issues when trying to create tables using pander. We have decided the best course of action to solve this predicament was to take a smaller portion of the data and use that to represent the dataset. By choosing the first 1,000 entries, we eliminate the bias that would come from handpicking certain data. We used this smaller data set for most testing purposes, but we did end up using the full data set. When we used the full data set we found a number of missing values in the number of owned users. We removed the contaminated observations.
   
 After observing our data closely, we have noticed that there are a few cases of missing data. One such case can be found in the 'BoardGamesGeek ID', where board games can be found that do not have any IDs entered at all. We have decided that these null values do not justify throwing the entire rows away as the 'BoardGamesGeek ID' does not directly affect any way that we are analyzing or wanting to use this data. Instead, we have decided to leave these values empty.  
   
   
-One of the most prominent predicaments we have come across in the early stages of observing our data is how to handle noisy data. The first instances we noticed were in the 'Min Players' and the 'Max Players' columns. Here, we saw board games hold the value of 0, which seems meaningless and does not make much sense at first. However, considering the context of what the minimum players and the maximum players means, we theorize that a 0 value means the board game did not specify a minimum or a maximum number of players. With that said, we have decided to simply remove these rows from our data sets. This accounted for a very small amount of the data and would not massively effect  
-analysis.
+One of the most prominent predicaments we have come across in the early stages of observing our data is how to handle noisy data. The first instances we noticed were in the 'Min Players' and the 'Max Players' columns. Here, we saw board games hold the value of 0, which seems meaningless and does not make much sense at first.However, considering the context of what the minimum players and the maximum players means, we theorize that a 0 value means the board game did not specify a minimum or a maximum number of players. With that said, we have decided to simply remove these rows from our data sets. This accounted for a very small amount of the data and would not massively effect analysis.
   
 We have also seen that the 'Year Published' column has negative values in it, which is completely illogical given the context. At first, we considered that the negative signs were a mistake, and we could take the absolute value. However, values reach -3500 so an absolute value would result in a year that has not yet occurred at the time of observing the data. Perhaps negative values represent years from BC as opposed to AD. This could be the case, but it is difficult to imagine humans in 1300 BC passing time by playing a friendly match of Tic-Tac-Toe, so it would probably be in our best interest to consult a domain expert before making assumptions.  
 
   
-We also noticed that the average rating and average complexity were in decimal format with commas instead of decimal points. This is common practice in Brazil, where this data was collected. We changed the commas to decimals to make performing calculations easier
+We also noticed that the average rating and average complexity were in decimal format with commas instead of decimal points. This is common practice in Brazil, where this data was collected. We changed the commas to decimals to make performing calculations easier.
 
-The last thing we noticed was that there were some missing/ negative values for the number of people who own some of the games. These also accounted for a tiny portion of the data so we simply omit the relevant observations.
+The last thing we noticed was that there were some missing/negative values for the number of people who own some of the games. These also accounted for a tiny portion of the data so we simply omit the relevant observations.
 
 ```{r,echo=TRUE,warning=FALSE}
 
-#usefull catagorizations of column names
+#useful categorizations of column names
 
 variables <- colnames(bgg_df)
 numeric_variables <- variables[c(3,4,5,6,7,8,9,10,11,12)]
@@ -98,7 +97,8 @@ subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0 & bgg_df$Year.P
 * Play Time is the publisher suggested average play time. This is an integer and is in minutes.
 * Min Age is the publisher suggested minimum age of play. This is an integer.
 * Users Rated is the number of users of BoardGameGeek who have given a rating to the board game. This is an integer.
-* Rating Average is the average of all of the individual user ratings of the board game on the site. This is a float with two decimal places.     * Note the commas intead of periods to denote decimal points, which is the common standard in Brazil.
+* Rating Average is the average of all of the individual user ratings of the board game on the site. This is a float with two decimal places.  
+  * Note the commas instead of periods to denote decimal points, which is the common standard in Brazil.
 * BGG Rank is the ranking of the board game on BoardGameGeek’s “Best of All Time” list. This rank is assumed to be correlated with Rating Average and Users Rated. This is an integer. Note that each entry is unique, as there can only be one “best game of all time” or “second best game of all time”, etc.
 
 
@@ -111,9 +111,7 @@ subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0 & bgg_df$Year.P
 # Histograms
 
 The two histograms below are based upon the BGG rank and the User count respectively.  
-The BGG rank histogram is a flat distribution,  
-which is what we would expect because of the fact that BGG ranks are unique to each game and assigned sequentially starting at 1.
-The histogram for the number of owned users looks like a Pareto distribution. It has the majority of games having player counter below 50,000
+The BGG rank histogram is a flat distribution,which is what we would expect because of the fact that BGG ranks are unique to each game and assigned sequentially starting at 1.The histogram for the number of owned users looks like a Pareto distribution. It has the majority of games having player counter below 50,000
 and the number of games with a higher player count decreasing as you get higher play counts.
 ```{r,echo=TRUE}
 
@@ -156,14 +154,13 @@ display_df_removed_outliers <- subset(bgg_df,(bgg_df$Min.Players != 0 &
 
 
 
-# Correlation analysis 
-We created a correlation chart for all of the numeric variables.  
-We have also observed a few correlations that we found interesting upon our initial analysis. For example, we have found a very high   correlation between the ‘Rating Average’ and the ‘BGG Rank’ columns. If we view the board games that are ranked near the top of ‘BGG Rank’,  We can see the associated ‘Rating Average’ values are typically among the highest.   
+# Correlation Analysis 
+We created a correlation chart for all of the numeric variables. We have also observed a few correlations that we found interesting upon our initial analysis. For example, we have found a very high   correlation between the ‘Rating Average’ and the ‘BGG Rank’ columns. If we view the board games that are ranked near the top of ‘BGG Rank’,  We can see the associated ‘Rating Average’ values are typically among the highest.   
 
 We also can see that there is a nearly 1 positive correlation for the number of users that own a game, and the number of users that rated a game.
 The reason for this is that the data set contains only ranked games. This is likely because of the likelihood that every person who rates a game on BGG, also checks on the website that they own the game.  
 
-We also notice that there is a very positive relation between the play time and the complexity. It seems likely that this is a causal relationship where the more complex a game is the longer the play time becomes.  
+We also notice that there is a very positive relation between the play time and the complexity. It seems likely that this is a causal relationship where the more complex a game is, the longer the play time becomes.  
 
 
 ```{r,echo=TRUE}
@@ -197,7 +194,7 @@ ylab = "Average Rating",ann = par("ann"), axes = TRUE)
 ```
 
 
-# Box plots
+# Box Plots
 
 
 Note : We made two graphs for the year the games were published in. One with all the data included, and one with all games published before 1990 excluded. We did this so it is easier to see the distribution of publishing dates for the more modern games, but you can still see that there are some outliers way back in history.
