@@ -78,8 +78,8 @@ removed_zero_years_df <- subset(bgg_df,(bgg_df$Year.Published > 0))
 
 removed_both_df <- subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0 &   
                                   bgg_df$Year.Published > 0 & bgg_df$Owned.Users > 0))
-above_2000_df <-   
-subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0 & bgg_df$Year.Published > 1990))
+above_2000_df <- na.omit(  
+subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0 & bgg_df$Year.Published > 1990)))
 
 
 
@@ -223,6 +223,101 @@ for(var in numeric_variables2){
 When our group first observed the data, we began to wonder what traits make games good. Are more complex games more desirable, or is simplicity key? Are newer games preferred, or are older games better? Through analysis of this data, we aim to develop an understanding of which traits are desired in a board game.
 
 Our group intends to create two regression models based on the attributes of our data. One model will predict the quality of the game in terms of average user rating, and the other will predict the popularity its popularity in terms of users owned. The coefficients assigned in the regression model will tell us the significance of each attribute in the overall opinion of the game. The use of two regression models generates two separate views. It tells us what traits result in games which are good, and what traits result in games which are popular.
+
+
+# Regressions
+
+```{r}
+print(colnames(removed_zero_years_df))
+
+x <- as.numeric(unlist( removed_both_df[c(4)]))
+y <- as.numeric(unlist( removed_both_df[c(9)]))
+
+regression <- lm(y~x)
+
+print(summary(regression))
+
+plot(y,x,col = "blue",main = "minimum players and average rating regression",
+abline(lm(x~y)),xlab = "average ratings",ylab = "min players ")
+
+```
+
+```{r}
+x <- as.numeric(unlist( removed_both_df[c(9)]))
+y <- as.numeric(unlist( removed_both_df[c(12)]))
+
+regression <- lm(y~x)
+
+print(summary(regression))
+
+plot(y,x,col = "blue",main = "average ratings and owned users regression",
+abline(lm(x~y)),xlab = "owned users",ylab = "average ratings")
+
+
+```
+
+
+```{r}
+x <- as.numeric(unlist( removed_both_df[c(11)]))
+y <- as.numeric(unlist( removed_both_df[c(12)]))
+
+regression <- lm(y~x)
+
+print(summary(regression))
+
+plot(y,x,col = "blue",main = "owned users and average complexity regression",
+abline(lm(x~y)),xlab = "owned users",ylab = "average complexity")
+
+
+```
+
+
+
+```{r}
+x <- as.numeric(unlist( removed_both_df[c(6)]))
+y <- as.numeric(unlist( removed_both_df[c(12)]))
+
+regression <- lm(y~x)
+
+print(summary(regression))
+
+plot(y,x,col = "blue",main = "owned users and play time regression",
+abline(lm(x~y)),xlab = "owned users",ylab = "Play time")
+
+
+```
+
+
+```{r}
+x <- as.numeric(unlist( removed_both_df[c(3)]))
+y <- as.numeric(unlist( removed_both_df[c(9)]))
+
+regression <- lm(y~x)
+
+print(summary(regression))
+
+plot(y,x,col = "blue",main = "average ratings and publishing year regression",
+abline(lm(x~y)),xlab = "publishing year",ylab = "average ratings")
+
+
+```
+
+
+```{r}
+x <- as.numeric(unlist( removed_both_df[c(10)]))
+y <- as.numeric(unlist( removed_both_df[c(12)]))
+
+regression <- lm(y~x)
+
+print(summary(regression))
+
+plot(y,x,col = "blue",main = "owned users and bgg rank regression",
+abline(lm(x~y)),xlab = "owned users",ylab = "bgg rank")
+
+
+```
+
+
 
 
 
