@@ -15,6 +15,7 @@ library("pander")
 library("ggplot2")
 library("DT")
 library("corrplot")
+library("datarium")
 bgg_df <- read.csv("./bgg_dataset.csv", sep = ";")
 ```
 
@@ -317,9 +318,22 @@ abline(lm(x~y)),xlab = "owned users",ylab = "bgg rank")
 
 ```
 
+```{r}
+dv_df <- read.csv("./dataset_for_viewing.csv", sep = ",")
+dv_df_removed <- subset(dv_df,(dv_df$Min.Players != 0 & dv_df$Max.Players != 0 &   
+                                  dv_df$Year.Published > 0 & dv_df$Owned.Users > 0))
+dv_df_all <- dv_df_removed[c(3,4,5,6,7,8,9,10,11,12)]
+dv_df_numeric <- dv_df_removed[c(3,4,5,6,7,9,11,12)]
 
+cor(dv_df_all, y = dv_df_all, method="pearson")
+head(dv_df_numeric)
+cor(dv_df_numeric, y = dv_df_numeric, method="pearson")
 
-
+Rating_Model <- lm(Rating.Average ~ Year.Published + Min.Players + Max.Players + Play.Time + Min.Age + Complexity.Average, data = dv_df_numeric)
+summary(Rating_Model)
+Pop_Model <- lm(Owned.Users ~ Year.Published + Min.Players + Max.Players + Play.Time + Min.Age + Complexity.Average, data = dv_df_numeric)
+summary(Pop_Model)
+```
 
 ## Citations
 
