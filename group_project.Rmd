@@ -100,13 +100,9 @@ subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0 & bgg_df$Year.P
 * Users Rated is the number of users of BoardGameGeek who have given a rating to the board game. This is an integer.
 * Rating Average is the average of all of the individual user ratings of the board game on the site. This is a float with two decimal places.  
   * Note the commas instead of periods to denote decimal points, which is the common standard in Brazil.
-* BGG Rank is the ranking of the board game on BoardGameGeek’s “Best of All Time” list. This rank is assumed to be correlated with Rating Average and Users Rated. This is an integer. Note that each entry is unique, as there can only be one “best game of all time” or “second best game of all time”, etc.
-
-
-
-
-
-
+* BGG Rank is the ranking of the board game on BoardGameGeek’s “Best of All Time” list. This rank is correlated with Rating Average and Users Rated. This is an integer. Note that each entry is unique, as there can only be one “best game of all time” or “second best game of all time”, etc.
+* Complexity is the rating of how hard a game is to learn or understand. It is an average of users' responses to the question "How heavy (difficult/complex) is this game?" on a scale of 1-5, where 1 is "light" and 5 is "heavy." It is an integer.
+* Users Owned is a the number of BGG users who have marked the game as part of their library. It is an integer. 
 
 
 # Histograms
@@ -228,6 +224,7 @@ Our group intends to create two regression models based on the attributes of our
 
 # Regressions
 
+We began by making simple regressions of single variables using *lm*. First, we analyzed the effect of Min_Players on Rating_Average. In this analysis, we find that there is a very weak correlation, with a coefficient of -0.22. In the graph, we can see that the line does not trace the data very well, and has a small R squared value. The fact that the coefficient is negative support the idea that games with a lower minimum requirement of players will be rated higher. This suggests that games which are easier to get a group to play with are rated higher.
 ```{r}
 print(colnames(removed_zero_years_df))
 
@@ -318,6 +315,8 @@ abline(lm(x~y)),xlab = "owned users",ylab = "bgg rank")
 
 ```
 
+When making our multiple regression model, we began by comparing the correlation between variables. There are three major correlations. The first is between BGG.Rank and Rating.Average, which makes sense, since the rank is a function of the average rating. Since the rank is categorical, we will exclude it anyway. The second is between Owned.Users and Users.Rated, which also makes sense. Because owned users is one of our goal targets, we will exclude users rated to not distort our model. Finally, Complexity.Average and Rating.Average have a decent correlation. This is decided to be a sensible correlation which doesn't distort our data but instead gives a view into what makes users rate a game highly, and will not be excluded.
+
 ```{r}
 dv_df <- read.csv("./dataset_for_viewing.csv", sep = ",")
 dv_df_removed <- subset(dv_df,(dv_df$Min.Players != 0 & dv_df$Max.Players != 0 &   
@@ -326,11 +325,19 @@ dv_df_all <- dv_df_removed[c(3,4,5,6,7,8,9,10,11,12)]
 dv_df_numeric <- dv_df_removed[c(3,4,5,6,7,9,11,12)]
 
 cor(dv_df_all, y = dv_df_all, method="pearson")
+```
+Here are the variables we will be working with.
+```{r}
 head(dv_df_numeric)
 cor(dv_df_numeric, y = dv_df_numeric, method="pearson")
-
+```
+This is our model for Rating.Average. It outputs the function "Rating.Average = (-0.216 * (Year.Published)) + (-71.760 (Min.Players)) + (2.06 (Max.Players)) + (-0.170 (Play.Time)) + (85.487 (Min.Age)) + (424.054 (Complexity.Average)) = 
+```{r}
 Rating_Model <- lm(Rating.Average ~ Year.Published + Min.Players + Max.Players + Play.Time + Min.Age + Complexity.Average, data = dv_df_numeric)
 summary(Rating_Model)
+```
+This is our model for Owned.Users.
+```{r}
 Pop_Model <- lm(Owned.Users ~ Year.Published + Min.Players + Max.Players + Play.Time + Min.Age + Complexity.Average, data = dv_df_numeric)
 summary(Pop_Model)
 ```
