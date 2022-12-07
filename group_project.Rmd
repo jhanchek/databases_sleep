@@ -95,7 +95,7 @@ subset(bgg_df,(bgg_df$Min.Players != 0 & bgg_df$Max.Players != 0 & bgg_df$Year.P
 * Year Published represents the (approximated in some cases) publishing year of the board game. Note that this is a signed integer, as dates * older than 1 AD are displayed as negatives.
 * Min Players is the publisher suggested minimum number of players. This is an integer. Note that some board games display a suggested * minimum players of zero.
 * Max Players is the publisher suggested maximum number of players. This is also an integer.
-* Play Time is the publisher suggested average play time. This is an integer and is in minutes.
+* Play Time is the publisher suggested average play time. If there is a range, it uses the maximum. This is an integer and is in minutes.
 * Min Age is the publisher suggested minimum age of play. This is an integer.
 * Users Rated is the number of users of BoardGameGeek who have given a rating to the board game. This is an integer.
 * Rating Average is the average of all of the individual user ratings of the board game on the site. This is a float with two decimal places.  
@@ -315,6 +315,8 @@ abline(lm(x~y)),xlab = "owned users",ylab = "bgg rank")
 
 ```
 
+# Multiple Regression
+
 When making our multiple regression model, we began by comparing the correlation between variables. There are three major correlations. The first is between BGG.Rank and Rating.Average, which makes sense, since the rank is a function of the average rating. Since the rank is categorical, we will exclude it anyway. The second is between Owned.Users and Users.Rated, which also makes sense. Because owned users is one of our goal targets, we will exclude users rated to not distort our model. Finally, Complexity.Average and Rating.Average have a decent correlation. This is decided to be a sensible correlation which doesn't distort our data but instead gives a view into what makes users rate a game highly, and will not be excluded.
 
 ```{r}
@@ -331,16 +333,62 @@ Here are the variables we will be working with.
 head(dv_df_numeric)
 cor(dv_df_numeric, y = dv_df_numeric, method="pearson")
 ```
-This is our model for Rating.Average. It outputs the function "Rating.Average = (-0.216 * (Year.Published)) + (-71.760 (Min.Players)) + (2.06 (Max.Players)) + (-0.170 (Play.Time)) + (85.487 (Min.Age)) + (424.054 (Complexity.Average)) = 
+
+# Rating Average Model
+
+This is our model for Rating.Average. It outputs the function "Rating.Average = (.003 * (Year.Published)) + (0.114 (Min.Players)) + (.000319 (Max.Players)) + (.0000144 (Play.Time)) + (.0154 (Min.Age)) + (.491 (Complexity.Average)) - .600"
+
+The p-value for our model is very low, indicating that there is a low probability of finding extreme new data outside of our prediction. However, the p-value isn't as low for all of our variables. Play.Time's p-value is higher but still fairly low, but Max.Players' p-value is quite high. This suggests that the maximum recommended player count of a game may be a poor predictor of its rating. Anecdotally, we find that we rarely play games with groups so large that not everyone can play, so it makes sense that maximum player count isn't significant in peoples' ratings.
+
+When we observe the R-Squared value, we see that it is fairly low at 0.26, meaning only about a quarter of the variation in the data can be explained by the model. While this doesn't automatically mean the model as bad, it does suggest that only a small part of the whole story can be explained by these variables, and that there may be significant factors which we haven't investigated.
+
+Another thing to note is that the estimated coefficients are all very low. This can be explained by the domains of these factors. The year published can reach as high as 2022, while the target variable only ranges from 1 to 10. The large difference in domains between variables makes it difficult to get a strong hold on the actual significance of each variable.
+
+We attempted to use this model to predict values for three recent games. Note that a prediction cannot be made using values outside the domain for the model, but since the model includes a game released in 2022, it is fine for us to make predictions on games released in 2022.
+
+The first game was Weather Machine published by Eagle-Gryphon Games in 2022. Plugging in values gives the equation "(.003 * (2022)) + (0.114 (1)) + (.000319 (4)) + (.0000144 (150)) + (.0154 (14)) + (.491 (4.45)) - .600" and the result is 7.984. The actual rating the game received is 7.981.
+
+The second game was Frosthaven, published by Cephalofair Games in 2022. The predicted ownership was found to be 7.596, and the actual rating is 7.227.
+
+The third game was Heat: Pedal to the Metal, published by Days of Wonder. The predictor ownership was calculated to be 6.788. The actual rating is much higher, at 7.860. The correlation analysis earlier in the report reveals a similarity between complexity and rank. The complexity for Heat was fairly low, at 2.14, compared to Weather Machine at 4.45 and Frosthaven at 3.66. With this in mind, it may be that the model over emphasizes complexity when predicting a game's rating.
 ```{r}
 Rating_Model <- lm(Rating.Average ~ Year.Published + Min.Players + Max.Players + Play.Time + Min.Age + Complexity.Average, data = dv_df_numeric)
 summary(Rating_Model)
 ```
-This is our model for Owned.Users.
+
+# Users Owned Model
+
+This is our model for Owned.Users. It outputs the function "Owned.Users = (-0.216 * (Year.Published)) + (-71.760 (Min.Players)) + (2.06 (Max.Players)) + (-0.170 (Play.Time)) + (85.487 (Min.Age)) + (424.054 (Complexity.Average)) + 337.840"
+
+The p-value for this model is also very low, but this time, many of the individual variables have very high p-values, especially Year.Published. This suggests that the age of a game makes for a terrible predictor of how popular it is. It is likely that the users of BoardGameGeek.com are constantly growing their collection, meaning they have fairly equal access to both more modern games and older games.
+
+The R Squared of this model is abysmally low, meaning our model is very unlikely to accurately predict how popular a game is based on the attributes we investigated.
+
+As with the Rating.Average model, the coefficients of this model are unusual, bit this time, they are often very large. This is because our target variable, Owned.Users, easily reaches values into the tens of thousands, and rarely, hundreds of thousands. Meanwhile, a predictor variable such as Complexity.Average, with a coefficient of 424.054, has a domain of just 1 to 5.
+
+We attempted to use this model to predict values for three recent games. Note that a prediction cannot be made using values outside the domain for the model, but since the model includes a game released in 2022, it is fine for us to make predictions on games released in 2022.
+
+The first game was Weather Machine published by Eagle-Gryphon Games. Plugging in values gives the equation "(-0.216 * (2022)) + (-71.760 (1)) + (2.06 (4)) + (-0.170 (150)) + (85.487 (14)) + (424.054 (4.45)) + 337.840" and the result is 2,895.93. The actual ownership of the game is 2,521.
+
+The second game was Frosthaven, published by Cephalofair Games. The predicted ownership was found to be 2566.02, and the actual ownership was 1,790.
+
+The third game was Heat: Pedal to the Metal, published by Days of Wonder. The predictor ownership was calculated to be 1593.83. The actual ownership was 1,659.
+
+These predictions are closer than one might expect from such an uncertain model, but are still not great. In addition, there is some bias in game choice. Since these games are all very recent releases, they are only owned by a small number of people. The longer a game is around, the more variation there may be in terms of how many people own it.
 ```{r}
 Pop_Model <- lm(Owned.Users ~ Year.Published + Min.Players + Max.Players + Play.Time + Min.Age + Complexity.Average, data = dv_df_numeric)
 summary(Pop_Model)
 ```
+
+# Conclusions
+
+While our models make it difficult to make significant conclusions, there are still certainly some which can be made. For one, even though it's hard to find the weight of coefficients, we can still see their sign. Year.Published is positive in the rating model, which suggests that newer games are likely to be rated higher than older ones. This means modern advances in the board game market are likely favored by fans and consumers, as opposed to preferring the nostalgia of older games. The especially low coefficients and p-values of Max.Players and Play.Time may mean that these factors are relatively unimportant in determining rating. Finally, due to the low r-squared of the model, it is possible that there are new conclusions to be made by further exploring more attributes of the data.
+
+In terms of the ownership model, its low confidence may suggest that these attributes have very little to contribute when predicting how many people will own a game. The popularity of a game may even be inherently random. Another possibility is that these attributes can contribute the a game's popularity, but that Owned.Users is a poor indicator of popularity.
+
+# How to improve the model
+
+We have determined several ways in which we could alter our model to improve its predictive capabilities. Firstly, we would normalize the data in order to get the data to exist within a similar domain. This would make it much easier to understand the coefficients of our regression. Secondly, we may take the year released and subtract it from 2022 to get the game's age. This would make the variable much more intuitive to understand. Finally, we may attempt to include more data. Our data set contains a wealth of categorical information of the mechanics (such as dice rolling or deck construction) and domains (such as "strategy games" or "party games"). These attributes have a huge domain, which makes analyzing them very difficult. However, they have the potential to reveal trends which other attributes cannot. There are many other attributes of games which were not in our data set that may still reveal trends, such as the designer, publisher, or the popularity of an existing franchise that the game may be licensing.
 
 ## Citations
 
